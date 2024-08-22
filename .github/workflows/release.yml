@@ -44,6 +44,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: output/*/*
+          asset_path: output/*
           asset_name: ${{ github.ref }}-${{ matrix.os }}-${{ matrix.arch }}
           asset_content_type: application/octet-stream
