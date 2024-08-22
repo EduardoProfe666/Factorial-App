@@ -27,23 +27,6 @@ jobs:
           GOOS=windows GOARCH=amd64 astilectron-bundler -c bundler.json
           GOOS=windows GOARCH=386 astilectron-bundler -c bundler.json
 
-      - name: Build for Linux
-        run: |
-          GOOS=linux GOARCH=amd64 astilectron-bundler -c bundler.json
-          GOOS=linux GOARCH=386 astilectron-bundler -c bundler.json
-          GOOS=linux GOARCH=arm astilectron-bundler -c bundler.json
-          GOOS=linux GOARCH=arm64 astilectron-bundler -c bundler.json
-
-      - name: Build for macOS
-        run: |
-          GOOS=darwin GOARCH=amd64 astilectron-bundler -c bundler.json
-          GOOS=darwin GOARCH=arm64 astilectron-bundler -c bundler.json
-
-      - name: Build for FreeBSD
-        run: |
-          GOOS=freebsd GOARCH=amd64 astilectron-bundler -c bundler.json
-          GOOS=freebsd GOARCH=386 astilectron-bundler -c bundler.json
-
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
