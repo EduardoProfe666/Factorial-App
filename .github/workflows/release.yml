@@ -1,0 +1,66 @@
+﻿name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.22
+
+      - name: Install astilectron-bundler
+        run: go install github.com/asticode/go-astilectron-bundler/astilectron-bundler@latest
+
+      - name: Build for Windows
+        run: |
+          GOOS=windows GOARCH=amd64 astilectron-bundler -c bundler.json
+          GOOS=windows GOARCH=386 astilectron-bundler -c bundler.json
+
+      - name: Build for Linux
+        run: |
+          GOOS=linux GOARCH=amd64 astilectron-bundler -c bundler.json
+          GOOS=linux GOARCH=386 astilectron-bundler -c bundler.json
+          GOOS=linux GOARCH=arm astilectron-bundler -c bundler.json
+          GOOS=linux GOARCH=arm64 astilectron-bundler -c bundler.json
+
+      - name: Build for macOS
+        run: |
+          GOOS=darwin GOARCH=amd64 astilectron-bundler -c bundler.json
+          GOOS=darwin GOARCH=arm64 astilectron-bundler -c bundler.json
+
+      - name: Build for FreeBSD
+        run: |
+          GOOS=freebsd GOARCH=amd64 astilectron-bundler -c bundler.json
+          GOOS=freebsd GOARCH=386 astilectron-bundler -c bundler.json
+
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+
+      - name: Upload release assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: output/*/*/*
+          asset_name: ${{ github.ref }}-${{ matrix.os }}-${{ matrix.arch }}
+          asset_content_type: application/octet-stream
