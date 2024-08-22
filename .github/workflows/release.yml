@@ -5,7 +5,7 @@ on:
     tags:
       - '*'
   workflow_dispatch:
- 
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -19,13 +19,17 @@ jobs:
         with:
           go-version: 1.22
 
-      - name: Install astilectron-bundler
-        run: go install github.com/asticode/go-astilectron-bundler/astilectron-bundler@latest
+      - name: Install fyne-cross
+        run: go install github.com/fyne-io/fyne-cross@latest
 
       - name: Build for Windows
-        run: |
-          GOOS=windows GOARCH=amd64 astilectron-bundler -c bundler.json
-          GOOS=windows GOARCH=386 astilectron-bundler -c bundler.json
+        run: fyne-cross windows -app-id "com.eduardoprofe666.factorialapp" -icon "assets/icon.png"
+
+      - name: Build for Linux
+        run: fyne-cross linux -app-id "com.eduardoprofe666.factorialapp" -icon "assets/icon.png"
+
+      - name: Build for macOS
+        run: fyne-cross darwin -app-id "com.eduardoprofe666.factorialapp" -icon "assets/icon.png"
 
       - name: Create release
         id: create_release
@@ -44,6 +48,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: output/*/
+          asset_path: fyne-cross/dist/*/*
           asset_name: ${{ github.ref }}-${{ matrix.os }}-${{ matrix.arch }}
           asset_content_type: application/octet-stream
