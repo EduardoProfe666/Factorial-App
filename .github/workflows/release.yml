@@ -25,9 +25,6 @@ jobs:
       - name: Build for Windows
         run: fyne-cross windows -app-id "com.eduardoprofe666.factorialapp" -icon "assets/icon.png"
 
-      - name: Build for macOS
-        run: fyne-cross darwin -app-id "com.eduardoprofe666.factorialapp" -icon "assets/icon.png"
-
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
