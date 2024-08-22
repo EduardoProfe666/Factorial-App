@@ -1,0 +1,49 @@
+{
+  "app_name": "FactorialApp",
+  "icon_path_darwin": "assets/icon.icns",
+  "icon_path_linux": "assets/icon.png",
+  "icon_path_windows": "assets/icon.ico",
+  "output_path": "output",
+  "targets": [
+    {
+      "arch": "amd64",
+      "os": "windows"
+    },
+    {
+      "arch": "386",
+      "os": "windows"
+    },
+    {
+      "arch": "amd64",
+      "os": "linux"
+    },
+    {
+      "arch": "386",
+      "os": "linux"
+    },
+    {
+      "arch": "arm",
+      "os": "linux"
+    },
+    {
+      "arch": "arm64",
+      "os": "linux"
+    },
+    {
+      "arch": "amd64",
+      "os": "darwin"
+    },
+    {
+      "arch": "arm64",
+      "os": "darwin"
+    },
+    {
+      "arch": "amd64",
+      "os": "freebsd"
+    },
+    {
+      "arch": "386",
+      "os": "freebsd"
+    }
+  ]
+}
