@@ -1,4 +1,4 @@
-﻿name: Release
+﻿name: Release 🚀
 
 on:
   push:
@@ -11,21 +11,21 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Checkout code 📦
         uses: actions/checkout@v2
 
-      - name: Set up Go
+      - name: Set up Go 🐹
         uses: actions/setup-go@v2
         with:
           go-version: 1.22
 
-      - name: Install fyne-cross
+      - name: Install fyne-cross 🛠️
         run: go install github.com/fyne-io/fyne-cross@latest
 
-      - name: Build for Windows
+      - name: Build for Windows 🏁
         run: fyne-cross windows -app-id "com.eduardoprofe666.factorialapp" -icon "assets/icon.png"
 
-      - name: Create release
+      - name: Create release 📢
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -36,7 +36,7 @@ jobs:
           draft: false
           prerelease: false
 
-      - name: Upload Windows release assets
+      - name: Upload Windows release assets 📤
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
