@@ -35,17 +35,11 @@ jobs:
       - name: Build for Windows (amd64) 🏁
         run: fyne-cross windows -app-id "com.eduardoprofe666.factorialapp" -icon "assets/icon.png"
 
-      - name: Build for Windows (386) 🏁
-        run: fyne-cross windows -arch 386 -app-id "com.eduardoprofe666.factorialapp" -icon "assets/icon.png"
-
       - name: Build for Android (arm64) 📱
         run: fyne-cross android -arch arm64 -app-id "com.eduardoprofe666.factorialapp" -icon "assets/icon.png"
 
       - name: Build for Android (arm) 📱
         run: fyne-cross android -arch arm -app-id "com.eduardoprofe666.factorialapp" -icon "assets/icon.png"
-
-      - name: Build for Android (386) 📱
-        run: fyne-cross android -arch 386 -app-id "com.eduardoprofe666.factorialapp" -icon "assets/icon.png"
 
       - name: Create release 📢
         id: create_release
@@ -68,16 +62,6 @@ jobs:
           asset_name: Factorial-App-windows-amd64.zip
           asset_content_type: application/zip
 
-      - name: Upload Windows (386) release assets 📤
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: fyne-cross/dist/windows-386/Factorial-App.exe.zip
-          asset_name: Factorial-App-windows-386.zip
-          asset_content_type: application/zip
-
       - name: Upload Android (arm64) release assets 📤
         uses: actions/upload-release-asset@v1
         env:
@@ -96,14 +80,4 @@ jobs:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: fyne-cross/dist/android-arm/Factorial-App.apk
           asset_name: Factorial-App-android-arm.apk
-          asset_content_type: application/vnd.android.package-archive
-
-      - name: Upload Android (386) release assets 📤
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: fyne-cross/dist/android-386/Factorial-App.apk
-          asset_name: Factorial-App-android-386.apk
           asset_content_type: application/vnd.android.package-archive
