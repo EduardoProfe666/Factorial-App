@@ -3,6 +3,8 @@
 import (
 	"factorial/internal/database"
 	"factorial/internal/logic"
+	"factorial/internal/ui/components"
+	utils2 "factorial/internal/ui/utils"
 	"factorial/internal/utils"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -11,35 +13,14 @@ import (
 	"strconv"
 	"sync"
 	"time"
-	"unicode"
 )
-
-// CustomEntry es un widget de entrada que solo permite dígitos
-type CustomEntry struct {
-	widget.Entry
-}
-
-// NewCustomEntry crea una nueva instancia de CustomEntry
-func NewCustomEntry() *CustomEntry {
-	entry := &CustomEntry{}
-	entry.ExtendBaseWidget(entry)
-	return entry
-}
-
-func (e *CustomEntry) TypedRune(r rune) {
-	if unicode.IsDigit(r) {
-		e.Entry.TypedRune(r)
-	}
-}
 
 func SetupUI(w fyne.Window) {
 	database.InitDB()
 	utils.LogInfo("Factorial App Started")
 
-	// Establecer el tamaño inicial y mínimo de la ventana
 	w.Resize(fyne.NewSize(600, 400))
 
-	// Título y descripción
 	title := widget.NewLabelWithStyle("Factorial Calculator", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 	description := widget.NewLabelWithStyle("Enter a number or a range to calculate the factorial.", fyne.TextAlignCenter, fyne.TextStyle{})
 
@@ -47,16 +28,16 @@ func SetupUI(w fyne.Window) {
 	rangeInput := widget.NewLabel("Range Input")
 	rangeInput.Hide()
 
-	entry := NewCustomEntry()
+	entry := components.NewCustomEntry()
 	entry.SetPlaceHolder("Enter a number")
 
-	lowerRangeEntry := NewCustomEntry()
+	lowerRangeEntry := components.NewCustomEntry()
 	lowerRangeEntry.SetPlaceHolder("Enter lower limit")
-	lowerRangeEntry.Hide() // Inicialmente oculto
+	lowerRangeEntry.Hide()
 
-	upperRangeEntry := NewCustomEntry()
+	upperRangeEntry := components.NewCustomEntry()
 	upperRangeEntry.SetPlaceHolder("Enter upper limit")
-	upperRangeEntry.Hide() // Inicialmente oculto
+	upperRangeEntry.Hide()
 
 	calculateRangeCheckbox := widget.NewCheck("Calculate Range", func(checked bool) {
 		if checked {
@@ -77,23 +58,19 @@ func SetupUI(w fyne.Window) {
 	resultLabel := widget.NewLabelWithStyle("", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 	resultLabel.Wrapping = fyne.TextWrapOff
 
-	// Usar el icono incorporado de Fyne para copiar contenido
 	copyButton := widget.NewButtonWithIcon("", theme.ContentCopyIcon(), nil)
 	copyButton.OnTapped = func() {
-		// Copiar solo el resultado numérico
 		result := resultLabel.Text
 		if len(result) > 8 {
-			result = result[8:] // Remover "Result: " del texto
+			result = result[8:]
 		}
 		w.Clipboard().SetContent(result)
-
-		// Cambiar el icono a ContentPasteIcon durante 1 segundo
 		copyButton.SetIcon(theme.ContentPasteIcon())
 		time.AfterFunc(1*time.Second, func() {
 			copyButton.SetIcon(theme.ContentCopyIcon())
 		})
 	}
-	copyButton.Hide() // Inicialmente oculto
+	copyButton.Hide()
 
 	calculateButton := widget.NewButton("Calculate Factorial", func() {
 		resultLabel.SetText("")
@@ -124,7 +101,6 @@ func SetupUI(w fyne.Window) {
 			}
 			wg.Wait()
 			resultLabel.SetText("Range factorial calculation completed.")
-			copyButton.Show()
 		} else {
 			number, err := strconv.Atoi(entry.Text)
 			if err != nil {
@@ -136,12 +112,12 @@ func SetupUI(w fyne.Window) {
 			result, err := database.GetFactorial(number)
 			if err == nil {
 				utils.LogResult(number, true)
-				resultLabel.SetText("Result: " + truncateString(result, 100))
+				resultLabel.SetText("Result: " + utils2.TruncateString(result, 100))
 				copyButton.Show()
 			} else {
 				result := logic.Factorial(number)
 				utils.LogResult(number, false)
-				resultLabel.SetText("Result: " + truncateString(result.String(), 100))
+				resultLabel.SetText("Result: " + utils2.TruncateString(result.String(), 100))
 				copyButton.Show()
 
 				err = database.SaveResult(number, result.String())
@@ -180,11 +156,4 @@ func SetupUI(w fyne.Window) {
 	w.SetOnClosed(func() {
 		utils.LogInfo("Factorial App Exited")
 	})
-}
-
-func truncateString(str string, num int) string {
-	if len(str) > num {
-		return str[0:num] + "..."
-	}
-	return str
 }

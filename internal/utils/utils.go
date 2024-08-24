@@ -17,7 +17,7 @@ func init() {
 		log.Fatalf("Error opening log file: %v", err)
 	}
 	logger = log.New(logFile, "", log.LstdFlags)
-	logger.SetFlags(0) // Remove default flags to customize the format
+	logger.SetFlags(0)
 }
 
 func logMessage(level, message string) {

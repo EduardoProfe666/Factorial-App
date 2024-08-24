@@ -14,9 +14,7 @@ import (
 var DB *sql.DB
 
 func InitDB() {
-	// Check if the database file exists
 	if _, err := os.Stat("./database.db"); os.IsNotExist(err) {
-		// Create the database file if it does not exist
 		file, err := os.Create("./database.db")
 		if err != nil {
 			utils.LogError("Error creating database file: " + err.Error())
