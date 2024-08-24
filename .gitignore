@@ -23,3 +23,6 @@ go.work
 database.db
 /Logs
 /Results
+*.db
+logs.txt
+database.db

@@ -19,6 +19,16 @@ jobs:
         with:
           go-version: 1.22
 
+      - name: Extract tag version 🔖
+        id: extract_tag
+        run: echo "::set-output name=version::${GITHUB_REF#refs/tags/}"
+
+      - name: Set metadata 📝
+        run: |
+          echo "VERSION=${{ steps.extract_tag.outputs.version }}" >> $GITHUB_ENV
+          echo "DESCRIPTION=Over-Engineered Factorial App made in Go." >> $GITHUB_ENV
+          echo "AUTHOR=EduardoProfe666" >> $GITHUB_ENV
+
       - name: Install fyne-cross 🛠️
         run: go install github.com/fyne-io/fyne-cross@latest
 
