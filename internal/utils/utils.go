@@ -27,15 +27,15 @@ func logMessage(level, message string) {
 }
 
 func LogInfo(message string) {
-	logMessage("INFO", message)
+	logMessage("ℹ️INFOℹ️", message)
 }
 
 func LogWarning(message string) {
-	logMessage("WARNING", message)
+	logMessage("⚠️ WARNING ⚠️", message)
 }
 
 func LogError(message string) {
-	logMessage("ERROR", message)
+	logMessage("❌ ERROR ❌", message)
 }
 
 func LogResult(number int, fromDatabase bool) {
