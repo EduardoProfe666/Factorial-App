@@ -11,6 +11,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	url2 "net/url"
 	"strconv"
 	"sync"
 	"time"
@@ -22,7 +23,10 @@ func SetupUI(w fyne.Window) {
 
 	w.Resize(fyne.NewSize(500, 400))
 
-	title := widget.NewLabelWithStyle("Factorial Calculator", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
+	titleText := canvas.NewText("Factorial Calculator", theme.ForegroundColor())
+	titleText.TextSize = 24
+	titleText.Alignment = fyne.TextAlignCenter
+
 	description := widget.NewLabelWithStyle("Enter a number or a range to calculate the factorial.", fyne.TextAlignCenter, fyne.TextStyle{})
 
 	numberInput := widget.NewLabel("Number Input")
@@ -146,10 +150,22 @@ func SetupUI(w fyne.Window) {
 	image := canvas.NewImageFromFile("resources/icon.png")
 	image.SetMinSize(fyne.NewSize(100, 100))
 	image.FillMode = canvas.ImageFillContain
+	emojiText := canvas.NewText("🎩", theme.ForegroundColor())
+	emojiText.TextSize = 24
+	emojiText.Alignment = fyne.TextAlignCenter
+
+	emojiLink := widget.NewButton("", func() {
+		url, _ := url2.Parse("https://eduardoprofe666.github.io/")
+		fyne.CurrentApp().OpenURL(url)
+	})
+	emojiLink.SetText("🎩")
+
+	titleContainer := container.NewHBox(titleText, emojiLink)
+	titleContainer = container.NewCenter(titleContainer)
 
 	content := container.NewVBox(
-		title,
-		container.NewCenter(image), // Centrar la imagen debajo del título
+		titleContainer,
+		container.NewCenter(image),
 		description,
 		inputContainer,
 		calculateRangeCheckbox,
