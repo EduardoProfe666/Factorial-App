@@ -7,6 +7,7 @@ import (
 	utils2 "factorial/internal/ui/utils"
 	"factorial/internal/utils"
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -19,7 +20,7 @@ func SetupUI(w fyne.Window) {
 	database.InitDB()
 	utils.LogInfo("Factorial App Started")
 
-	w.Resize(fyne.NewSize(600, 400))
+	w.Resize(fyne.NewSize(500, 400))
 
 	title := widget.NewLabelWithStyle("Factorial Calculator", fyne.TextAlignCenter, fyne.TextStyle{Bold: true})
 	description := widget.NewLabelWithStyle("Enter a number or a range to calculate the factorial.", fyne.TextAlignCenter, fyne.TextStyle{})
@@ -142,8 +143,13 @@ func SetupUI(w fyne.Window) {
 		container.NewCenter(copyButton),
 	)
 
+	image := canvas.NewImageFromFile("resources/icon.png")
+	image.SetMinSize(fyne.NewSize(100, 100))
+	image.FillMode = canvas.ImageFillContain
+
 	content := container.NewVBox(
 		title,
+		container.NewCenter(image), // Centrar la imagen debajo del título
 		description,
 		inputContainer,
 		calculateRangeCheckbox,
