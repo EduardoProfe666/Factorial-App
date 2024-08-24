@@ -176,7 +176,28 @@ func SetupUI(w fyne.Window) {
 	})
 
 	viewDataButton := widget.NewButtonWithIcon("", theme.StorageIcon(), func() {
-		// Lógica para ver datos guardados en la base de datos
+		results, err := database.GetResults()
+		if err != nil {
+			utils.LogError("Error retrieving results: " + err.Error())
+			resultLabel.SetText("Error retrieving results")
+			return
+		}
+
+		var items []fyne.CanvasObject
+		for _, result := range results {
+			label := widget.NewLabelWithStyle(strconv.Itoa(result.Number)+": "+utils2.TruncateString(result.Result, 20), fyne.TextAlignLeading, fyne.TextStyle{Monospace: true})
+			label.Wrapping = fyne.TextWrapOff
+			copyButton := widget.NewButtonWithIcon("", theme.ContentCopyIcon(), func() {
+				w.Clipboard().SetContent(result.Result)
+			})
+			items = append(items, container.NewHBox(label, copyButton))
+		}
+
+		totalLabel := widget.NewLabel("Total results: " + strconv.Itoa(len(results)))
+		scrollContainer := container.NewVScroll(container.NewVBox(append([]fyne.CanvasObject{totalLabel}, items...)...))
+		scrollContainer.SetMinSize(fyne.NewSize(400, 300))
+
+		dialog.NewCustom("Saved Results", "Close", scrollContainer, w).Show()
 	})
 
 	deleteDataButton := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {

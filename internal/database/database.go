@@ -93,7 +93,7 @@ type FactorialResult struct {
 }
 
 func GetResults() ([]FactorialResult, error) {
-	rows, err := DB.Query("SELECT number, result FROM factorial")
+	rows, err := DB.Query("SELECT number, result FROM factorial ORDER BY number ASC")
 	if err != nil {
 		utils.LogError("Error querying database: " + err.Error())
 		return nil, err
