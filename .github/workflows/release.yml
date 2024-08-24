@@ -32,16 +32,8 @@ jobs:
       - name: Install fyne-cross 🛠️
         run: go install github.com/fyne-io/fyne-cross@latest
 
-      - name: Build for Android (arm64) 📱
-        run: fyne-cross android -arch arm64 -app-id "com.eduardoprofe666.factorialapp" -icon "assets/icon.png"
-
       - name: Build for Windows (amd64) 🏁
         run: fyne-cross windows -app-id "com.eduardoprofe666.factorialapp" -icon "assets/icon.png"
-
-
-
-      - name: Build for Android (arm) 📱
-        run: fyne-cross android -arch arm -app-id "com.eduardoprofe666.factorialapp" -icon "assets/icon.png"
 
       - name: Create release 📢
         id: create_release
@@ -61,25 +53,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: fyne-cross/dist/windows-amd64/Factorial-App.exe.zip
-          asset_name: Factorial-App-windows-amd64.zip
+          asset_name: Factorial-App-windows-amd64-${{ steps.extract_tag.outputs.version }}.zip
           asset_content_type: application/zip
-
-      - name: Upload Android (arm64) release assets 📤
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: fyne-cross/dist/android-arm64/Factorial-App.apk
-          asset_name: Factorial-App-android-arm64.apk
-          asset_content_type: application/vnd.android.package-archive
-
-      - name: Upload Android (arm) release assets 📤
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: fyne-cross/dist/android-arm/Factorial-App.apk
-          asset_name: Factorial-App-android-arm.apk
-          asset_content_type: application/vnd.android.package-archive
