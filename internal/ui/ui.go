@@ -9,6 +9,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	url2 "net/url"
@@ -175,11 +176,21 @@ func SetupUI(w fyne.Window) {
 	})
 
 	viewDataButton := widget.NewButtonWithIcon("", theme.StorageIcon(), func() {
-
+		// Lógica para ver datos guardados en la base de datos
 	})
 
 	deleteDataButton := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
-
+		dialog.NewConfirm("Warning", "Are you sure you want to delete all data?", func(confirmed bool) {
+			if confirmed {
+				err := database.ClearResults()
+				if err != nil {
+					utils.LogError("Error deleting data: " + err.Error())
+					resultLabel.SetText("Error deleting data")
+				} else {
+					resultLabel.SetText("All data deleted")
+				}
+			}
+		}, w).Show()
 	})
 
 	dockButtons := container.NewHBox(
