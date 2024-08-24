@@ -2,6 +2,7 @@
 
 import (
 	"database/sql"
+	"encoding/csv"
 	"errors"
 	"factorial/internal/utils"
 	"os"
@@ -86,7 +87,12 @@ func saveResultWithRetry(number int, result string) error {
 	return nil
 }
 
-func GetResults() ([]string, error) {
+type FactorialResult struct {
+	Number int
+	Result string
+}
+
+func GetResults() ([]FactorialResult, error) {
 	rows, err := DB.Query("SELECT number, result FROM factorial")
 	if err != nil {
 		utils.LogError("Error querying database: " + err.Error())
@@ -94,7 +100,7 @@ func GetResults() ([]string, error) {
 	}
 	defer rows.Close()
 
-	var results []string
+	var results []FactorialResult
 	for rows.Next() {
 		var number int
 		var result string
@@ -103,7 +109,7 @@ func GetResults() ([]string, error) {
 			utils.LogError("Error scanning row: " + err.Error())
 			return nil, err
 		}
-		results = append(results, result)
+		results = append(results, FactorialResult{Number: number, Result: result})
 	}
 
 	return results, nil
@@ -133,5 +139,29 @@ func ClearResults() error {
 	}
 
 	utils.LogInfo("Database results cleared successfully")
+	return nil
+}
+
+func ExportToCSV(filename string) error {
+	results, err := GetResults()
+	if err != nil {
+		return err
+	}
+
+	file, err := os.Create(filename)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	writer.Write([]string{"Number", "Result"})
+
+	for _, result := range results {
+		writer.Write([]string{strconv.Itoa(result.Number), result.Result})
+	}
+
 	return nil
 }

@@ -163,6 +163,31 @@ func SetupUI(w fyne.Window) {
 	titleContainer := container.NewHBox(titleText, emojiLink)
 	titleContainer = container.NewCenter(titleContainer)
 
+	exportCSVButton := widget.NewButtonWithIcon("", theme.DownloadIcon(), func() {
+		err := database.ExportToCSV("results.csv")
+		if err != nil {
+			utils.LogError("Error exporting to CSV: " + err.Error())
+			resultLabel.SetText("Error exporting to CSV")
+		} else {
+			resultLabel.SetText("Results exported to results.csv")
+		}
+		copyButton.Hide()
+	})
+
+	viewDataButton := widget.NewButtonWithIcon("", theme.StorageIcon(), func() {
+
+	})
+
+	deleteDataButton := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
+
+	})
+
+	dockButtons := container.NewHBox(
+		container.NewCenter(exportCSVButton),
+		container.NewCenter(viewDataButton),
+		container.NewCenter(deleteDataButton),
+	)
+
 	content := container.NewVBox(
 		titleContainer,
 		container.NewCenter(image),
@@ -171,6 +196,7 @@ func SetupUI(w fyne.Window) {
 		calculateRangeCheckbox,
 		calculateButton,
 		resultContainer,
+		container.NewCenter(dockButtons),
 	)
 
 	w.SetContent(content)
