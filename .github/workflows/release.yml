@@ -52,6 +52,16 @@ jobs:
           draft: false
           prerelease: false
 
+      - name: Upload Android (arm64) release assets 📤
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: fyne-cross/dist/android-arm64/Factorial-App.apk
+          asset_name: Factorial-App-android-arm64.apk
+          asset_content_type: application/vnd.android.package-archive
+
       - name: Upload Windows (amd64) release assets 📤
         uses: actions/upload-release-asset@v1
         env:
@@ -62,15 +72,7 @@ jobs:
           asset_name: Factorial-App-windows-amd64.zip
           asset_content_type: application/zip
 
-      - name: Upload Android (arm64) release assets 📤
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: fyne-cross/dist/android-arm64/Factorial-App.apk
-          asset_name: Factorial-App-android-arm64.apk
-          asset_content_type: application/vnd.android.package-archive
+
 
       - name: Upload Android (arm) release assets 📤
         uses: actions/upload-release-asset@v1
