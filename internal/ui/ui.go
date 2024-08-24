@@ -10,6 +10,7 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/dialog"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	url2 "net/url"
@@ -78,61 +79,75 @@ func SetupUI(w fyne.Window) {
 	}
 	copyButton.Hide()
 
+	progressBar := widget.NewProgressBarInfinite()
+	progressBar.Stop()
+	progressBar.Hide()
+
 	calculateButton := widget.NewButton("Calculate Factorial", func() {
 		resultLabel.SetText("")
 		copyButton.Hide()
-		if calculateRangeCheckbox.Checked {
-			lowerLimit, err1 := strconv.Atoi(lowerRangeEntry.Text)
-			upperLimit, err2 := strconv.Atoi(upperRangeEntry.Text)
-			if err1 != nil || err2 != nil || lowerLimit > upperLimit {
-				resultLabel.SetText("Invalid range values")
-				utils.LogError("Invalid range values")
-				return
-			}
+		progressBar.Show()
+		progressBar.Start()
 
-			var wg sync.WaitGroup
-			for i := lowerLimit; i <= upperLimit; i++ {
-				wg.Add(1)
-				go func(num int) {
-					defer wg.Done()
-					_, err := database.GetFactorial(num)
-					if err != nil {
-						result := logic.Factorial(num)
-						err = database.SaveResult(num, result.String())
+		go func() {
+			defer func() {
+				progressBar.Stop()
+				progressBar.Hide()
+			}()
+
+			if calculateRangeCheckbox.Checked {
+				lowerLimit, err1 := strconv.Atoi(lowerRangeEntry.Text)
+				upperLimit, err2 := strconv.Atoi(upperRangeEntry.Text)
+				if err1 != nil || err2 != nil || lowerLimit > upperLimit {
+					resultLabel.SetText("Invalid range values")
+					utils.LogError("Invalid range values")
+					return
+				}
+
+				var wg sync.WaitGroup
+				for i := lowerLimit; i <= upperLimit; i++ {
+					wg.Add(1)
+					go func(num int) {
+						defer wg.Done()
+						_, err := database.GetFactorial(num)
 						if err != nil {
-							utils.LogError("Error saving result to database: " + err.Error())
+							result := logic.Factorial(num)
+							err = database.SaveResult(num, result.String())
+							if err != nil {
+								utils.LogError("Error saving result to database: " + err.Error())
+							}
 						}
-					}
-				}(i)
-			}
-			wg.Wait()
-			resultLabel.SetText("Range factorial calculation completed.")
-		} else {
-			number, err := strconv.Atoi(entry.Text)
-			if err != nil {
-				resultLabel.SetText("Invalid input")
-				utils.LogError("Invalid input")
-				return
-			}
-
-			result, err := database.GetFactorial(number)
-			if err == nil {
-				utils.LogResult(number, true)
-				resultLabel.SetText("Result: " + utils2.TruncateString(result, 100))
-				copyButton.Show()
+					}(i)
+				}
+				wg.Wait()
+				resultLabel.SetText("Range factorial calculation completed.")
 			} else {
-				result := logic.Factorial(number)
-				utils.LogResult(number, false)
-				resultLabel.SetText("Result: " + utils2.TruncateString(result.String(), 100))
-				copyButton.Show()
-
-				err = database.SaveResult(number, result.String())
+				number, err := strconv.Atoi(entry.Text)
 				if err != nil {
-					resultLabel.SetText("Error saving result to database")
-					utils.LogError("Error saving result to database: " + err.Error())
+					resultLabel.SetText("Invalid input")
+					utils.LogError("Invalid input")
+					return
+				}
+
+				result, err := database.GetFactorial(number)
+				if err == nil {
+					utils.LogResult(number, true)
+					resultLabel.SetText("Result: " + utils2.TruncateString(result, 100))
+					copyButton.Show()
+				} else {
+					result := logic.Factorial(number)
+					utils.LogResult(number, false)
+					resultLabel.SetText("Result: " + utils2.TruncateString(result.String(), 100))
+					copyButton.Show()
+
+					err = database.SaveResult(number, result.String())
+					if err != nil {
+						resultLabel.SetText("Error saving result to database")
+						utils.LogError("Error saving result to database: " + err.Error())
+					}
 				}
 			}
-		}
+		}()
 	})
 
 	inputContainer := container.NewVBox(
@@ -164,60 +179,98 @@ func SetupUI(w fyne.Window) {
 	titleContainer := container.NewHBox(titleText, emojiLink)
 	titleContainer = container.NewCenter(titleContainer)
 
-	exportCSVButton := widget.NewButtonWithIcon("", theme.DownloadIcon(), func() {
-		err := database.ExportToCSV("results.csv")
-		if err != nil {
-			utils.LogError("Error exporting to CSV: " + err.Error())
-			resultLabel.SetText("Error exporting to CSV")
-		} else {
-			resultLabel.SetText("Results exported to results.csv")
-		}
-		copyButton.Hide()
-	})
+	menu := fyne.NewMainMenu(
+		fyne.NewMenu("File",
+			fyne.NewMenuItem("Export to CSV", func() {
+				progressBar.Show()
+				progressBar.Start()
 
-	viewDataButton := widget.NewButtonWithIcon("", theme.StorageIcon(), func() {
-		results, err := database.GetResults()
-		if err != nil {
-			utils.LogError("Error retrieving results: " + err.Error())
-			resultLabel.SetText("Error retrieving results")
-			return
-		}
+				go func() {
+					defer func() {
+						progressBar.Stop()
+						progressBar.Hide()
+					}()
 
-		var items []fyne.CanvasObject
-		for _, result := range results {
-			label := widget.NewLabelWithStyle(strconv.Itoa(result.Number)+": "+utils2.TruncateString(result.Result, 20), fyne.TextAlignLeading, fyne.TextStyle{Monospace: true})
-			label.Wrapping = fyne.TextWrapOff
-			copyButton := widget.NewButtonWithIcon("", theme.ContentCopyIcon(), func() {
-				w.Clipboard().SetContent(result.Result)
-			})
-			items = append(items, container.NewHBox(label, copyButton))
-		}
+					err := database.ExportToCSV("results.csv")
+					if err != nil {
+						utils.LogError("Error exporting to CSV: " + err.Error())
+						resultLabel.SetText("Error exporting to CSV")
+					} else {
+						resultLabel.SetText("Results exported to results.csv")
+					}
+					copyButton.Hide()
+				}()
+			}),
+			fyne.NewMenuItem("View Data", func() {
+				progressBar.Show()
+				progressBar.Start()
 
-		totalLabel := widget.NewLabel("Total results: " + strconv.Itoa(len(results)))
-		scrollContainer := container.NewVScroll(container.NewVBox(append([]fyne.CanvasObject{totalLabel}, items...)...))
-		scrollContainer.SetMinSize(fyne.NewSize(400, 300))
+				go func() {
+					defer func() {
+						progressBar.Stop()
+						progressBar.Hide()
+					}()
 
-		dialog.NewCustom("Saved Results", "Close", scrollContainer, w).Show()
-	})
+					results, err := database.GetResults()
+					if err != nil {
+						utils.LogError("Error retrieving results: " + err.Error())
+						resultLabel.SetText("Error retrieving results")
+						return
+					}
 
-	deleteDataButton := widget.NewButtonWithIcon("", theme.DeleteIcon(), func() {
-		dialog.NewConfirm("Warning", "Are you sure you want to delete all data?", func(confirmed bool) {
-			if confirmed {
-				err := database.ClearResults()
-				if err != nil {
-					utils.LogError("Error deleting data: " + err.Error())
-					resultLabel.SetText("Error deleting data")
-				} else {
-					resultLabel.SetText("All data deleted")
-				}
-			}
-		}, w).Show()
-	})
+					var items []fyne.CanvasObject
+					for _, result := range results {
+						label := widget.NewLabelWithStyle(strconv.Itoa(result.Number)+": "+utils2.TruncateString(result.Result, 20), fyne.TextAlignLeading, fyne.TextStyle{Monospace: true})
+						label.Wrapping = fyne.TextWrapOff
+						copyButton := widget.NewButtonWithIcon("", theme.ContentCopyIcon(), func() {
+							w.Clipboard().SetContent(result.Result)
+						})
+						items = append(items, container.NewHBox(label, copyButton))
+					}
 
-	dockButtons := container.NewHBox(
-		container.NewCenter(exportCSVButton),
-		container.NewCenter(viewDataButton),
-		container.NewCenter(deleteDataButton),
+					totalLabel := widget.NewLabel("Total results: " + strconv.Itoa(len(results)))
+					scrollContainer := container.NewVScroll(container.NewVBox(append([]fyne.CanvasObject{totalLabel}, items...)...))
+					scrollContainer.SetMinSize(fyne.NewSize(400, 300))
+
+					dialog.NewCustom("Saved Results", "Close", scrollContainer, w).Show()
+				}()
+			}),
+			fyne.NewMenuItem("Delete Data", func() {
+				dialog.NewConfirm("Warning", "Are you sure you want to delete all data?", func(confirmed bool) {
+					if confirmed {
+						progressBar.Show()
+						progressBar.Start()
+
+						go func() {
+							defer func() {
+								progressBar.Stop()
+								progressBar.Hide()
+							}()
+
+							err := database.ClearResults()
+							if err != nil {
+								utils.LogError("Error deleting data: " + err.Error())
+								resultLabel.SetText("Error deleting data")
+							} else {
+								resultLabel.SetText("All data deleted")
+							}
+						}()
+					}
+				}, w).Show()
+			}),
+		),
+		fyne.NewMenu("Settings",
+			fyne.NewMenuItem("Preferences", func() {
+				showPreferencesDialog(w)
+			}),
+		),
+	)
+	w.SetMainMenu(menu)
+
+	progressBarContainer := container.NewHBox(
+		layout.NewSpacer(),
+		progressBar,
+		layout.NewSpacer(),
 	)
 
 	content := container.NewVBox(
@@ -228,7 +281,7 @@ func SetupUI(w fyne.Window) {
 		calculateRangeCheckbox,
 		calculateButton,
 		resultContainer,
-		container.NewCenter(dockButtons),
+		container.NewCenter(progressBarContainer),
 	)
 
 	w.SetContent(content)
@@ -236,4 +289,44 @@ func SetupUI(w fyne.Window) {
 	w.SetOnClosed(func() {
 		utils.LogInfo("Factorial App Exited")
 	})
+}
+
+func showPreferencesDialog(w fyne.Window) {
+	darkModeCheckbox := widget.NewCheck("Dark Mode", func(checked bool) {
+		if checked {
+			fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+		} else {
+			fyne.CurrentApp().Settings().SetTheme(theme.LightTheme())
+		}
+	})
+	fyne.CurrentApp().Settings().SetTheme(theme.DarkTheme())
+	darkModeCheckbox.Checked = true
+
+	languageSelect := widget.NewSelect([]string{"English", "Spanish", "French"}, func(selected string) {
+		// Handle language selection
+	})
+	languageSelect.SetSelected("English")
+
+	preferencesContent := container.NewVBox(
+		widget.NewLabel("Preferences"),
+		darkModeCheckbox,
+		widget.NewLabel("Language:"),
+		languageSelect,
+	)
+
+	footer := container.NewBorder(nil, nil, nil, nil,
+		container.NewVBox(
+			widget.NewSeparator(),
+			widget.NewLabelWithStyle("©️ "+strconv.Itoa(time.Now().Year())+" EduardoProfe666 🎩", fyne.TextAlignCenter, fyne.TextStyle{Bold: true}),
+		),
+	)
+
+	emojiLink := widget.NewButton("", func() {
+		url, _ := url2.Parse("https://eduardoprofe666.github.io/")
+		fyne.CurrentApp().OpenURL(url)
+	})
+	emojiLink.SetText("🎩")
+
+	preferencesDialog := dialog.NewCustom("Preferences", "Close", container.NewVBox(preferencesContent, footer), w)
+	preferencesDialog.Show()
 }
