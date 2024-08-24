@@ -1,15 +1,15 @@
 ﻿package main
 
 import (
-	"bufio"
-	"factorial/database"
-	"factorial/ui"
-	"os"
+	"factorial/internal/ui"
+	"fyne.io/fyne/v2/app"
 )
 
 func main() {
-	database.InitDB()
+	a := app.New()
+	w := a.NewWindow("Factorial App")
 
-	reader := bufio.NewReader(os.Stdin)
-	ui.RunUI(reader)
+	ui.SetupUI(w)
+
+	w.ShowAndRun()
 }

@@ -25,6 +25,12 @@ jobs:
       - name: Build for Windows
         run: fyne-cross windows -app-id "com.eduardoprofe666.factorialapp" -icon "assets/icon.png"
 
+      - name: Build for Linux
+        run: fyne-cross linux -app-id "com.eduardoprofe666.factorialapp" -icon "assets/icon.png"
+
+      - name: Build for macOS
+        run: fyne-cross darwin -app-id "com.eduardoprofe666.factorialapp" -icon "assets/icon.png"
+
       - name: Create release
         id: create_release
         uses: actions/create-release@v1
@@ -42,6 +48,26 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: fyne-cross/dist/windows-amd64/Factorial-Console-App.exe.zip
-          asset_name: Factorial-Console-App-windows-amd64.zip
+          asset_path: fyne-cross/dist/windows-amd64/Factorial-App.exe.zip
+          asset_name: Factorial-App-windows-amd64.zip
+          asset_content_type: application/zip
+
+      - name: Upload Linux release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: fyne-cross/dist/linux-amd64/Factorial-App.tar.gz
+          asset_name: Factorial-App-linux-amd64.tar.gz
+          asset_content_type: application/gzip
+
+      - name: Upload macOS release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: fyne-cross/dist/darwin-amd64/Factorial-App.app.zip
+          asset_name: Factorial-App-darwin-amd64.app.zip
           asset_content_type: application/zip
