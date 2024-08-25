@@ -11,7 +11,7 @@ import (
 	"sync"
 )
 
-func CreateCalculateButton(w fyne.Window, resultContainer *fyne.Container, progressBarContainer *fyne.Container, inputContainer *fyne.Container) *widget.Button {
+func CreateCalculateButton(w fyne.Window, resultContainer *fyne.Container, progressBarContainer *fyne.Container, inputContainer *fyne.Container, calculateRangeCheckbox *widget.Check) *widget.Button {
 	resultLabel := resultContainer.Objects[0].(*fyne.Container).Objects[0].(*widget.Label)
 	copyButton := resultContainer.Objects[1].(*fyne.Container).Objects[0].(*widget.Button)
 	progressBar := progressBarContainer.Objects[1].(*widget.ProgressBarInfinite)
@@ -19,7 +19,6 @@ func CreateCalculateButton(w fyne.Window, resultContainer *fyne.Container, progr
 	entry := inputContainer.Objects[1].(*CustomEntry)
 	lowerRangeEntry := inputContainer.Objects[3].(*CustomEntry)
 	upperRangeEntry := inputContainer.Objects[4].(*CustomEntry)
-	calculateRangeCheckbox := CreateCalculateRangeCheckbox(inputContainer)
 
 	return widget.NewButton("Calculate Factorial", func() {
 		resultLabel.SetText("")

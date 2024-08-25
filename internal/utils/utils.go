@@ -31,11 +31,11 @@ func LogInfo(message string) {
 }
 
 func LogWarning(message string) {
-	logMessage("⚠️ WARNING ⚠️", message)
+	logMessage("⚠️WARNING⚠️", message)
 }
 
 func LogError(message string) {
-	logMessage("❌ ERROR ❌", message)
+	logMessage("❌ERROR❌", message)
 }
 
 func LogResult(number int, fromDatabase bool) {

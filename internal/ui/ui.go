@@ -16,16 +16,17 @@ func SetupUI(w fyne.Window) {
 	titleContainer := components.CreateTitleContainer(w)
 	description := components.CreateDescription()
 	inputContainer := components.CreateInputContainer()
+	calculateRangeCheckbox := components.CreateCalculateRangeCheckbox(inputContainer)
 	resultContainer := components.CreateResultContainer(w)
 	progressBarContainer := components.CreateProgressBarContainer()
 
-	calculateButton := components.CreateCalculateButton(w, resultContainer, progressBarContainer, inputContainer)
+	calculateButton := components.CreateCalculateButton(w, resultContainer, progressBarContainer, inputContainer, calculateRangeCheckbox)
 
 	content := container.NewVBox(
 		titleContainer,
 		description,
 		inputContainer,
-		components.CreateCalculateRangeCheckbox(inputContainer),
+		calculateRangeCheckbox,
 		calculateButton,
 		resultContainer,
 		container.NewCenter(progressBarContainer),
