@@ -3,7 +3,6 @@
 import (
 	"factorial/internal/database"
 	"factorial/internal/logic"
-	utils2 "factorial/internal/ui/utils"
 	"factorial/internal/utils"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
@@ -11,7 +10,7 @@ import (
 	"sync"
 )
 
-func CreateCalculateButton(w fyne.Window, resultContainer *fyne.Container, progressBarContainer *fyne.Container, inputContainer *fyne.Container, calculateRangeCheckbox *widget.Check) *widget.Button {
+func CreateCalculateButton(w fyne.Window, resultContainer *fyne.Container, progressBarContainer *fyne.Container, inputContainer *fyne.Container, calculateRangeCheckbox *widget.Check, updateResult func(string)) *widget.Button {
 	resultLabel := resultContainer.Objects[0].(*fyne.Container).Objects[0].(*widget.Label)
 	copyButton := resultContainer.Objects[1].(*fyne.Container).Objects[0].(*widget.Button)
 	progressBar := progressBarContainer.Objects[1].(*widget.ProgressBarInfinite)
@@ -69,13 +68,11 @@ func CreateCalculateButton(w fyne.Window, resultContainer *fyne.Container, progr
 				result, err := database.GetFactorial(number)
 				if err == nil {
 					utils.LogResult(number, true)
-					resultLabel.SetText("Result: " + utils2.TruncateString(result, 100))
-					copyButton.Show()
+					updateResult(result)
 				} else {
 					result := logic.Factorial(number)
 					utils.LogResult(number, false)
-					resultLabel.SetText("Result: " + utils2.TruncateString(result.String(), 100))
-					copyButton.Show()
+					updateResult(result.String())
 
 					err = database.SaveResult(number, result.String())
 					if err != nil {

@@ -17,10 +17,10 @@ func SetupUI(w fyne.Window) {
 	description := components.CreateDescription()
 	inputContainer := components.CreateInputContainer()
 	calculateRangeCheckbox := components.CreateCalculateRangeCheckbox(inputContainer)
-	resultContainer := components.CreateResultContainer(w)
 	progressBarContainer := components.CreateProgressBarContainer()
+	resultContainer, updateResult := components.CreateResultContainer(w)
 
-	calculateButton := components.CreateCalculateButton(w, resultContainer, progressBarContainer, inputContainer, calculateRangeCheckbox)
+	calculateButton := components.CreateCalculateButton(w, resultContainer, progressBarContainer, inputContainer, calculateRangeCheckbox, updateResult)
 
 	content := container.NewVBox(
 		titleContainer,
@@ -31,7 +31,6 @@ func SetupUI(w fyne.Window) {
 		resultContainer,
 		container.NewCenter(progressBarContainer),
 	)
-
 	resultLabel := resultContainer.Objects[0].(*fyne.Container).Objects[0].(*widget.Label)
 
 	w.SetContent(content)
